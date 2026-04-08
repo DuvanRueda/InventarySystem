@@ -6,6 +6,8 @@ import co.edu.uptc.config.LoadConfig;
 import co.edu.uptc.config.i18n.I18nConfig;
 import co.edu.uptc.interfaces.IPresenter;
 import co.edu.uptc.interfaces.IView;
+import co.edu.uptc.pojo.Person;
+import co.edu.uptc.pojo.Product;
 import co.edu.uptc.pojo.TransactionType;
 import co.edu.uptc.pojo.UnitOfMeasure;
 import co.edu.uptc.view.forms.ContabilityDataForm;
@@ -78,7 +80,7 @@ public class MainFrame extends JFrame implements IView {
                 p -> new Object[]{p.getName(), p.getLastName(),
                                   p.getGender(), (Period.between(p.getBirthDate(), LocalDate.now()).getYears())}));
 
-        persons.deleteButton.addActionListener(e -> showRemoved(presenter.removePerson()));
+        persons.deleteButton.addActionListener(e -> showRemoved(deletedPerson(presenter.removePerson())));
         persons.exportButton.addActionListener(e -> handleExport(
                 presenter::exportPeople, presenter.getListPeople().isEmpty()));
         persons.btnExit.addActionListener(e      -> layout.show(container, "main"));
@@ -92,7 +94,7 @@ public class MainFrame extends JFrame implements IView {
                              i18n.get("col.unit.type"), i18n.get("col.price")},
                 p -> new Object[]{p.getId(), p.getDescription(),
                                   toLocalUnit(p.getUnitOfMeasure()), p.getPrice()}));
-        products.deleteButton.addActionListener(e -> showRemoved(presenter.removeProduct()));
+        products.deleteButton.addActionListener(e -> showRemoved(deletedProduct(presenter.removeProduct())));
         products.exportButton.addActionListener(e -> handleExport(
                 presenter::exportProducts, presenter.getListProduct().isEmpty()));
         products.btnExit.addActionListener(e     -> layout.show(container, "main"));
@@ -132,12 +134,12 @@ public class MainFrame extends JFrame implements IView {
         JOptionPane.showMessageDialog(this,i18n.get("msg.export.success").replace("{0}", folder));
     }
 
-    private void showRemoved(Object removed) {
+    private void showRemoved(String removed) {
         if (removed == null)
             JOptionPane.showMessageDialog(this, i18n.get("msg.list.empty"));
         else
             JOptionPane.showMessageDialog(this,
-                    i18n.get("msg.removed").replace("{0}", removed.toString()));
+                    i18n.get("msg.removed").replace("{0}", removed));
     }
 
     private String toLocalUnit(UnitOfMeasure unit) {
@@ -154,6 +156,14 @@ public class MainFrame extends JFrame implements IView {
             case INCOME   -> i18n.get("income");
             case EXPENSES -> i18n.get("expenses");
         };
+    }
+
+    private String deletedPerson(Person p){
+        return p.getName()+" "+p.getLastName()+"\n"+p.getBirthDate()+"\n"+p.getGender();
+    }
+
+    private String deletedProduct(Product p){
+        return p.getDescription()+"\n"+p.getPrice()+"\n"+toLocalUnit(p.getUnitOfMeasure());
     }
 
     @Override public void setPresenter(IPresenter presenter) { this.presenter = presenter; }
